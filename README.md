@@ -1,6 +1,5 @@
 # CppEditor
 
-Standalone Android code editor widget (extracted from AndroLua_pro).
 
 ## What you get
 - `CppEditor` (full-featured editor View)
@@ -11,8 +10,7 @@ Standalone Android code editor widget (extracted from AndroLua_pro).
 
 1. In Android Studio: **File → New → New Module → Android Library**
 2. Copy the folder `app/src/main/java/com/` into your library module's `src/main/java/`
-3. (Recommended) Rename the package from `com.androlua` to something like `com.cppeditor` (update imports if you do)
-4. In your library module's `build.gradle`:
+3. In your library module's `build.gradle`:
    ```gradle
    android {
        compileSdkVersion 34
@@ -50,8 +48,6 @@ setContentView(editor);
 - `addNames(String[])` and `addPackage(String, String[])` for custom autocomplete
 
 ## Notes
-- No Lua, no full AndroLua dependencies.
 - Works as a normal Android View.
 - For better C++ support you can edit `LanguageC.java` (add more keywords, operators, etc.).
 
-Originally from Nsad123/ab (fork of nirenr/AndroLua_pro). Pruned & adapted June 2026.
