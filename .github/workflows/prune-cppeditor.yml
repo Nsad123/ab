@@ -1,0 +1,111 @@
+name: Prune Repo to CppEditor Only
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Target branch to create (e.g. cppeditor-only)'
+        required: true
+        default: 'cppeditor-only'
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create target branch
+        run: |
+          git checkout -b ${{ github.event.inputs.branch }}
+
+      - name: Prune to only CppEditor + connected files (textwarrior)
+        run: |
+          KEEP_PATHS=(
+            "app/src/main/java/com/androlua/LuaEditor.java"
+            "app/src/main/java/com/myopicmobile/textwarrior/android/"
+            "app/src/main/java/com/myopicmobile/textwarrior/common/"
+            ".github/workflows/"
+            "README.md"
+            ".gitignore"
+            "LICENSE.txt"
+          )
+
+          mkdir -p /tmp/keep
+          for path in "${KEEP_PATHS[@]}"; do
+            if [ -e "$path" ]; then
+              mkdir -p "/tmp/keep/$(dirname "$path")"
+              cp -r "$path" "/tmp/keep/$(dirname "$path")/"
+              echo "Kept: $path"
+            fi
+          done
+
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.github' -exec rm -rf {} + 2>/dev/null || true
+          cp -r /tmp/keep/* . 2>/dev/null || true
+          rm -rf /tmp/keep
+          echo "Prune complete. Remaining top level:"
+          ls -la
+
+      - name: Rename LuaEditor to CppEditor and adapt for C++ support
+        run: |
+          if [ -f "app/src/main/java/com/androlua/LuaEditor.java" ]; then
+            mv "app/src/main/java/com/androlua/LuaEditor.java" "app/src/main/java/com/androlua/CppEditor.java"
+          fi
+
+          if [ -f "app/src/main/java/com/androlua/CppEditor.java" ]; then
+            sed -i 's/public class LuaEditor extends FreeScrollingTextField/public class CppEditor extends FreeScrollingTextField/' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i 's/LuaEditor/CppEditor/g' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i 's/Lexer.setLanguage(LanguageLua.getInstance());/Lexer.setLanguage(LanguageC.getInstance());/' "app/src/main/java/com/androlua/CppEditor.java"
+
+            # Remove LuaApplication dependency
+            sed -i '/private String fontDir = LuaApplication.getInstance().getLuaExtDir("fonts");/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/private String libDir = LuaApplication.getInstance().getLuaExtPath("android.jar");/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/File df = new File(fontDir, "default.ttf");/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/if (df.exists())/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/setTypeface(Typeface.createFromFile(df));/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/File bf = new File(fontDir, "bold.ttf");/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/if (bf.exists())/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/setBoldTypeface(Typeface.createFromFile(bf));/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/File tf = new File(fontDir, "italic.ttf");/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/if (tf.exists())/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/setItalicTypeface(Typeface.createFromFile(tf));/d' "app/src/main/java/com/androlua/CppEditor.java"
+            sed -i '/new AsyncTask(){/,+20d' "app/src/main/java/com/androlua/CppEditor.java" || true
+
+            echo "CppEditor adapted for C++ (LanguageC) + standalone"
+          fi
+
+          find . -name "*.java" -exec sed -i 's/LuaEditor/CppEditor/g' {} + 2>/dev/null || true
+
+          if [ -f "README.md" ]; then
+            cat > README.md << 'EOF'
+# CppEditor (standalone)
+
+Android text editor widget extracted from AndroLua_pro (Nsad123/ab fork), renamed + adapted for **C/C++**.
+
+## Included
+- `CppEditor.java`
+- Full `com.myopicmobile.textwarrior.*` engine (android + common)
+- Defaults to `LanguageC` (C/C++ syntax highlighting + autocomplete)
+- All the usual features: search, goto, undo/redo, word-wrap, themes, etc.
+
+## How to use as Android Library (AAR)
+1. In Android Studio: **File → New → New Module → Android Library**
+2. Copy `app/src/main/java/com/` into your library module's `src/main/java/`
+3. (Optional) Change package name (e.g. `com.yourcompany.cppeditor`)
+4. In the library's `build.gradle`:
+   ```gradle
+   android {
+       compileSdkVersion 28   // or higher
+       defaultConfig {
+           minSdkVersion 18
+           targetSdkVersion 28
+       }
+   }
