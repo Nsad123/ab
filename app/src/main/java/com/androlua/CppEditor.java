@@ -67,10 +67,6 @@ public class CppEditor extends FreeScrollingTextField {
         array.recycle();
         setTextColor(textColor);
         setTextHighlightColor(textColorHighlight);
-        /*
-            moveCaret(_index);
-            _index = 0;
-        }
     }
 
     public void setDark(boolean isDark) {
