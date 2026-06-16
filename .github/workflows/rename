@@ -1,0 +1,154 @@
+name: Rename Packages (androlua → editor + myopicmobile → helper)
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Source branch to rename packages on (e.g. sa or cppeditor-only)'
+        required: true
+        default: 'sa'
+      target_branch:
+        description: 'New branch name after renaming (leave empty to overwrite source)'
+        required: false
+        default: ''
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.source_branch }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create target branch (if different)
+        run: |
+          TARGET="${{ github.event.inputs.target_branch }}"
+          if [ -n "$TARGET" ]; then
+            git checkout -b "$TARGET"
+            echo "Created new branch: $TARGET"
+          else
+            echo "Will commit directly on source branch"
+          fi
+
+      - name: Rename package folders
+        run: |
+          set -e
+          echo "=== Renaming package folders ==="
+
+          mkdir -p app/src/main/java/com
+
+          # Rename com/androlua → com/editor
+          if [ -d "app/src/main/java/com/androlua" ]; then
+            mv "app/src/main/java/com/androlua" "app/src/main/java/com/editor"
+            echo "Renamed: com/androlua → com/editor"
+          fi
+
+          # Rename com/myopicmobile → com/helper
+          if [ -d "app/src/main/java/com/myopicmobile" ]; then
+            mv "app/src/main/java/com/myopicmobile" "app/src/main/java/com/helper"
+            echo "Renamed: com/myopicmobile → com/helper"
+          fi
+
+          echo "=== Folder structure after rename ==="
+          find app/src/main/java/com -type d | sort
+
+      - name: Update all imports and package declarations (androlua → editor)
+        run: |
+          echo "=== Updating references: androlua → editor ==="
+          
+          # Update package declarations and imports in all Java files
+          find . -name "*.java" -type f -exec sed -i \
+            -e 's|package com\.androlua;|package com.editor;|g' \
+            -e 's|import com\.androlua\.|import com.editor.|g' \
+            -e 's|com\.androlua\.|com.editor.|g' \
+            {} +
+
+          # Also update in any other files that might reference the old package (gradle, xml, etc.)
+          find . -type f \( -name "*.gradle" -o -name "*.xml" -o -name "*.md" -o -name "*.properties" \) -exec sed -i \
+            's|com\.androlua|com.editor|g' {} + 2>/dev/null || true
+
+          echo "Done: androlua → editor"
+
+      - name: Update all imports and package declarations (myopicmobile → helper)
+        run: |
+          echo "=== Updating references: myopicmobile → helper ==="
+
+          find . -name "*.java" -type f -exec sed -i \
+            -e 's|package com\.myopicmobile|package com.helper|g' \
+            -e 's|import com\.myopicmobile\.|import com.helper.|g' \
+            -e 's|com\.myopicmobile\.|com.helper.|g' \
+            {} +
+
+          find . -type f \( -name "*.gradle" -o -name "*.xml" -o -name "*.md" -o -name "*.properties" \) -exec sed -i \
+            's|com\.myopicmobile|com.helper|g' {} + 2>/dev/null || true
+
+          echo "Done: myopicmobile → helper"
+
+      - name: Fix remaining old references inside the new CppEditor.java
+        run: |
+          FILE="app/src/main/java/com/editor/CppEditor.java"
+          if [ -f "$FILE" ]; then
+            # Fix the remaining LanguageLua references that should stay as LanguageC (or be cleaned)
+            sed -i 's/LanguageLua/LanguageC/g' "$FILE" || true
+            
+            # Clean up broken font loading code that was left after previous prune
+            sed -i '/if (df.exists())/d' "$FILE" || true
+            sed -i '/setTypeface(Typeface.createFromFile(df));/d' "$FILE" || true
+            sed -i '/if (bf.exists())/d' "$FILE" || true
+            sed -i '/setBoldTypeface(Typeface.createFromFile(bf));/d' "$FILE" || true
+            sed -i '/if (tf.exists())/d' "$FILE" || true
+            sed -i '/setItalicTypeface(Typeface.createFromFile(tf));/d' "$FILE" || true
+            
+            echo "Cleaned up CppEditor.java"
+          fi
+
+      - name: Update README.md with new package names
+        run: |
+          if [ -f "README.md" ]; then
+            sed -i 's|com\.androlua|com.editor|g' README.md
+            sed -i 's|com\.myopicmobile|com.helper|g' README.md
+            echo "README.md updated with new package names"
+          fi
+
+      - name: Commit changes
+        run: |
+          git add -A
+          
+          TARGET="${{ github.event.inputs.target_branch }}"
+          if [ -n "$TARGET" ]; then
+            BRANCH_MSG="on branch $TARGET"
+          else
+            BRANCH_MSG="on current branch"
+          fi
+          
+          git commit -m "Rename packages: com.androlua → com.editor and com.myopicmobile → com.helper
+
+          - CppEditor.java is now in package com.editor
+          - All textwarrior classes are now in package com.helper.textwarrior
+          - Updated all imports and package declarations
+          - Cleaned up leftover code in CppEditor.java
+          " || echo "No changes to commit"
+
+          git push origin HEAD --force
+
+      - name: Summary
+        run: |
+          echo "✅ Package rename completed!"
+          echo ""
+          echo "New structure on branch:"
+          echo "  com.editor.CppEditor"
+          echo "  com.helper.textwarrior.android.*"
+          echo "  com.helper.textwarrior.common.*"
+          echo ""
+          echo "Old structure (com.androlua + com.myopicmobile) has been removed."
+          echo ""
+          echo "If you set a different target_branch, switch to it now."
+          echo "Then you can make it the default branch in Settings → Branches."
