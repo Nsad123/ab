@@ -3,7 +3,7 @@ package com.myopicmobile.textwarrior.common;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 
-import com.androlua.LuaEditor;
+import com.androlua.CppEditor;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -43,17 +43,17 @@ public class WriteTask extends AsyncTask
 
     final protected Document _buf;
     private static int _total = 0;
-    private LuaEditor _edit;
+    private CppEditor _edit;
 
     private File _file;
 
     private long _len;
 
-    public WriteTask(LuaEditor edit,String fileName){
+    public WriteTask(CppEditor edit,String fileName){
         this(edit,new File(fileName));
     }
 
-    public WriteTask(LuaEditor edit,File file){
+    public WriteTask(CppEditor edit,File file){
         _file=file;
         _len=_file.length();
         _edit=edit;

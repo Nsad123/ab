@@ -34,17 +34,17 @@ public class ReadTask extends AsyncTask
 
 	final protected Document _buf;
 	private static int _total = 0;
-	private LuaEditor _edit;
+	private CppEditor _edit;
 
 	private File _file;
 
 	private long _len;
 	
-	public ReadTask(LuaEditor edit,String fileName){
+	public ReadTask(CppEditor edit,String fileName){
 		this(edit,new File(fileName));
 	}
 	
-	public ReadTask(LuaEditor edit,File file){
+	public ReadTask(CppEditor edit,File file){
 		_file=file;
 		_len=_file.length();
 		_edit=edit;
