@@ -1,4 +1,4 @@
-package com.editor;
+package com.androlua;
 
 import android.annotation.SuppressLint;
 import android.content.*;
