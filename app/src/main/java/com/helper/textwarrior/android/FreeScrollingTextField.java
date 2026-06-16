@@ -2613,8 +2613,7 @@ public class FreeScrollingTextField extends View
         }
 
         @Override
-        //This is usually called from a non-UI thread
-        public void lexDone(final List<Pair> results) {
+		public void lexDone(final List results) {
             post(new Runnable() {
                 @Override
                 public void run() {
