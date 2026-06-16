@@ -134,7 +134,7 @@ public class Lexer {
         }
 
         // ==================== GENERIC TOKENIZER (Recommended for C/C++) ====================
-        ArrayList<Pair> typedTokens = new ArrayList<>();
+        //ArrayList<Pair> typedTokens = new ArrayList<>();
         private void tokenizeGeneric() {
             DocumentProvider hDoc = getDocument();
             Language language = Lexer.getLanguage();
