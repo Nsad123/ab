@@ -60,7 +60,7 @@ public class LanguageC extends Language {
     private final static char[] CPP_OPERATORS = {
         '(', ')', '{', '}', '[', ']', ',', ';', '=', '+', '-',
         '/', '*', '&', '!', '|', ':', '<', '>', '?', '~', '%', '^',
-        '.', '->', '::', '++', '--', '==', '!=', '<=', '>=', '&&', '||'
+        '.'
     };
 
     public static Language getInstance() {
