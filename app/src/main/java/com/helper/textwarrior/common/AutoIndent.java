@@ -185,4 +185,33 @@ public class AutoIndent {
     }
 
     private static TokenType getFirstTokenType(String lowerLine) {
-        if (lowerLine.startsWith("else if")) 
+        if (lowerLine.startsWith("else if")) return TokenType.ELSEIF;
+        if (lowerLine.startsWith("else")) return TokenType.ELSE;
+        if (lowerLine.startsWith("case ")) return TokenType.CASE;
+        if (lowerLine.startsWith("default:")) return TokenType.DEFAULT;
+        if (lowerLine.startsWith("}")) return TokenType.RCURLY;
+        if (lowerLine.startsWith("end")) return TokenType.END;
+        if (lowerLine.startsWith("until")) return TokenType.UNTIL;
+        if (lowerLine.startsWith("::")) return TokenType.DOUBLE_COLON;
+        if (lowerLine.startsWith("@")) return TokenType.AT;
+        if (lowerLine.length() == 0) return TokenType.WHITE_SPACE;
+        return TokenType.OTHER;
+    }
+
+    private enum TokenType {
+        WHITE_SPACE, ELSE, ELSEIF, CASE, DEFAULT, DOUBLE_COLON, AT,
+        END, UNTIL, RCURLY, OTHER
+    }
+
+    private static char[] createIndent(int n) {
+        if (n < 0) return new char[0];
+        char[] idts = new char[n];
+        for (int i = 0; i < n; i++) idts[i] = ' ';
+        return idts;
+    }
+
+    // Compatibility overload
+    public static int createAutoIndent(String text) {
+        return createAutoIndent((CharSequence) text);
+    }
+}
