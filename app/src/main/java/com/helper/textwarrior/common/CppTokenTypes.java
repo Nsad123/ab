@@ -1,0 +1,58 @@
+package com.helper.textwarrior.common;
+
+/**
+ * Token types for C/C++ language.
+ * Adapted from the original LuaTokenTypes for CppEditor.
+ */
+public enum CppTokenTypes {
+    // Basic
+    SHEBANG_CONTENT,
+    NEW_LINE,
+    WHITE_SPACE,
+    BAD_CHARACTER,
+
+    // Literals & identifiers
+    NAME,
+    NUMBER,
+    STRING,
+    CHAR,
+
+    // Operators
+    PLUS, MINUS, MULT, DIV, MOD, EXP,
+    BIT_AND, BIT_OR, BIT_XOR, BIT_NOT,
+    BIT_LTLT, BIT_RTRT,
+    EQ, NE, GT, LT, GE, LE,
+    ASSIGN,
+    PLUS_ASSIGN, MINUS_ASSIGN, MULT_ASSIGN, DIV_ASSIGN, MOD_ASSIGN,
+    AND, OR, NOT,
+
+    // Punctuation
+    LPAREN, RPAREN,
+    LBRACK, RBRACK,
+    LCURLY, RCURLY,
+    COMMA, SEMI, COLON, DOT,
+    ELLIPSIS,
+    DOUBLE_COLON,
+    ARROW,
+
+    // Comments
+    SHORT_COMMENT,
+    BLOCK_COMMENT,
+
+    // Preprocessor
+    PREPROCESSOR,
+
+    // C/C++ Keywords
+    AUTO, BOOL, BREAK, CASE, CATCH, CHAR, CLASS, CONST, CONSTEXPR,
+    CONTINUE, DEFAULT, DELETE, DO, DOUBLE, ELSE, ENUM, EXPLICIT,
+    EXTERN, FALSE, FINAL, FLOAT, FOR, FRIEND, GOTO, IF, INLINE,
+    INT, LONG, MUTABLE, NAMESPACE, NEW, NOEXCEPT, NULLPTR,
+    OPERATOR, OVERRIDE, PRIVATE, PROTECTED, PUBLIC, REGISTER,
+    RETURN, SHORT, SIGNED, SIZEOF, STATIC, STATIC_ASSERT,
+    STRUCT, SWITCH, TEMPLATE, THIS, THROW, TRUE, TRY, TYPEDEF,
+    TYPENAME, UNION, UNSIGNED, USING, VIRTUAL, VOID, VOLATILE,
+    WHILE,
+
+    // Common preprocessor
+    INCLUDE, DEFINE, IFDEF, IFNDEF, ENDIF, PRAGMA
+}
