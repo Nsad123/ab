@@ -3,7 +3,7 @@
 
 ## What you get
 - `CppEditor` (full-featured editor View)
-- Complete `com.myopicmobile.textwarrior` engine (syntax highlighting, autocomplete, undo/redo, search, etc.)
+- Complete `com.helper.textwarrior` engine (syntax highlighting, autocomplete, undo/redo, search, etc.)
 - Defaults to **C/C++** syntax (`LanguageC`)
 
 ## How to turn this into an Android Library (AAR)
