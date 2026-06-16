@@ -134,6 +134,7 @@ public class Lexer {
         }
 
         // ==================== GENERIC TOKENIZER (Recommended for C/C++) ====================
+        ArrayList<Pair> typedTokens = new ArrayList<>();
         private void tokenizeGeneric() {
             DocumentProvider hDoc = getDocument();
             Language language = Lexer.getLanguage();
@@ -188,7 +189,7 @@ public class Lexer {
                         if (stateChanged) {
                             if (pendingState == DOUBLE_SYMBOL_LINE || pendingState == DOUBLE_SYMBOL_DELIMITED_MULTILINE) {
                                 spanStartPosition = workingPosition - 1;
-                                if (tokens.size() > 0 && tokens.get(tokens.size() - 1).getFirst() == spanStartPosition) {
+                                if (tokens.size() > 0 && ((Pair) tokens.get(tokens.size() - 1)).getFirst() == spanStartPosition) {
                                     tokens.remove(tokens.size() - 1);
                                 }
                             } else {
